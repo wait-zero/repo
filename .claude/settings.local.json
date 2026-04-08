@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p \"C:/Users/sth90/repo/waitzero/.claude/agents\")",
+      "Bash(mkdir -p \"C:/Users/sth90/repo/waitzero/.claude/skills/waitzero-build/references\")",
+      "Bash(mkdir -p \"C:/Users/sth90/repo/waitzero/.claude/skills/setup-project\")",
+      "Bash(mkdir -p \"C:/Users/sth90/repo/waitzero/.claude/skills/build-backend/references\")",
+      "Bash(mkdir -p \"C:/Users/sth90/repo/waitzero/.claude/skills/build-frontend/references\")",
+      "Bash(java -version)",
+      "Bash(curl -sL \"https://services.gradle.org/distributions/gradle-8.12-bin.zip\" -o /tmp/gradle-8.12.zip)",
+      "Read(//c/tmp/**)",
+      "Bash(unzip -o gradle-8.12.zip \"gradle-8.12/lib/gradle-wrapper-*.jar\")",
+      "Bash(curl -sL \"https://raw.githubusercontent.com/gradle/gradle/v8.12.0/gradle/wrapper/gradle-wrapper.jar\" -o \"C:/Users/sth90/repo/waitzero/backend/gradle/wrapper/gradle-wrapper.jar\")",
+      "Bash(chmod:*)",
+      "Bash(./gradlew compileJava --no-daemon)",
+      "Bash(bash gradlew:*)",
+      "Bash(docker compose:*)",
+      "Bash(docker exec:*)",
+      "Bash(ssh:*)",
+      "Bash(scp:*)",
+      "Bash(curl:*)"
+    ]
+  }
+}

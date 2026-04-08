@@ -1,0 +1,40 @@
+# Workspace (중간 산출물)
+_workspace/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backend (Spring Boot / Gradle)
+backend/.gradle/
+backend/build/
+backend/bin/
+backend/out/
+backend/*.jar
+backend/*.war
+
+# Environment
+.env
+.env.local
+backend/src/main/resources/application-local.yml
+
+# Frontend (Flutter)
+frontend/.dart_tool/
+frontend/.packages
+frontend/build/
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+
+# SSH Keys
+*.key
+*.pub
+*.pem
+ssh-key-*
+
+# Logs
+*.log
