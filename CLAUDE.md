@@ -6,7 +6,7 @@
 - Frontend: Flutter (모바일 앱)
 - Backend: Java 23 + Spring Boot + Gradle
 - DB: MySQL + JPA (ORM)
-- AI: Claude API (민원 분류/요약) + speech_to_text (음성 인식)
+- AI: OpenAI API via Spring AI (민원 분류/요약) + speech_to_text (음성 인식)
 - 공공데이터: 공공데이터포털 API
 
 ## 하네스: WaitZero Build

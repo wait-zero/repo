@@ -6,83 +6,62 @@ import com.waitzero.ai.dto.AiClassifyResponse;
 import com.waitzero.ai.dto.AiSummarizeResponse;
 import com.waitzero.global.exception.CustomException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
-
-import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Service
 public class AiClassifyService {
 
-    private final RestClient restClient;
-    private final String model;
+    private final ChatClient chatClient;
     private final ObjectMapper objectMapper;
 
-    public AiClassifyService(
-            @Value("${ai.claude.api-key}") String apiKey,
-            @Value("${ai.claude.model}") String model,
-            @Value("${ai.claude.base-url}") String baseUrl,
-            ObjectMapper objectMapper) {
-        this.model = model;
+    private static final String CLASSIFY_SYSTEM_PROMPT = """
+            당신은 한국 관공서 민원 분류 전문가입니다.
+            사용자가 설명하는 민원 내용을 아래 카테고리 중 하나로 분류하세요:
+            [주민등록, 전입신고, 인감증명, 차량등록, 건축허가, 사업자등록, 기타]
+            반드시 아래 JSON 형식으로만 응답하세요:
+            {"category": "카테고리명", "confidence": 0.0~1.0, "summary": "요약 내용"}
+            """;
+
+    private static final String SUMMARIZE_SYSTEM_PROMPT = """
+            당신은 민원 요약 전문가입니다. 사용자의 민원 내용을 간결하게 요약하세요.
+            반드시 아래 JSON 형식으로만 응답하세요:
+            {"summary": "요약 내용"}
+            """;
+
+    public AiClassifyService(ChatClient.Builder chatClientBuilder, ObjectMapper objectMapper) {
+        this.chatClient = chatClientBuilder.build();
         this.objectMapper = objectMapper;
-        this.restClient = RestClient.builder()
-                .baseUrl(baseUrl)
-                .defaultHeader("x-api-key", apiKey)
-                .defaultHeader("anthropic-version", "2023-06-01")
-                .defaultHeader("Content-Type", "application/json")
-                .build();
     }
 
     public AiClassifyResponse classify(String text) {
-        String systemPrompt = """
-                당신은 민원 분류 전문가입니다. 사용자의 민원 내용을 분석하여 적절한 카테고리로 분류하세요.
-                가능한 카테고리: 주민등록, 전입신고, 인감증명, 차량등록, 건축허가, 사업자등록, 기타
-                반드시 아래 JSON 형식으로만 응답하세요:
-                {"category": "카테고리명", "confidence": 0.0~1.0, "summary": "요약 내용"}
-                """;
+        try {
+            String response = chatClient.prompt()
+                    .system(CLASSIFY_SYSTEM_PROMPT)
+                    .user(text)
+                    .call()
+                    .content();
 
-        String responseText = callClaudeApi(systemPrompt, text);
-        return parseClassifyResponse(responseText);
+            return parseClassifyResponse(response);
+        } catch (Exception e) {
+            log.error("OpenAI API 호출 실패", e);
+            throw new CustomException("AI 서비스 호출에 실패했습니다.", HttpStatus.SERVICE_UNAVAILABLE);
+        }
     }
 
     public AiSummarizeResponse summarize(String text) {
-        String systemPrompt = """
-                당신은 민원 요약 전문가입니다. 사용자의 민원 내용을 간결하게 요약하세요.
-                반드시 아래 JSON 형식으로만 응답하세요:
-                {"summary": "요약 내용"}
-                """;
-
-        String responseText = callClaudeApi(systemPrompt, text);
-        return parseSummarizeResponse(responseText);
-    }
-
-    private String callClaudeApi(String systemPrompt, String userText) {
-        Map<String, Object> requestBody = Map.of(
-                "model", model,
-                "max_tokens", 1024,
-                "system", systemPrompt,
-                "messages", List.of(
-                        Map.of("role", "user", "content", userText)
-                )
-        );
-
         try {
-            String response = restClient.post()
-                    .uri("/v1/messages")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(requestBody)
-                    .retrieve()
-                    .body(String.class);
+            String response = chatClient.prompt()
+                    .system(SUMMARIZE_SYSTEM_PROMPT)
+                    .user(text)
+                    .call()
+                    .content();
 
-            JsonNode root = objectMapper.readTree(response);
-            return root.path("content").get(0).path("text").asText();
+            return parseSummarizeResponse(response);
         } catch (Exception e) {
-            log.error("Claude API 호출 실패", e);
+            log.error("OpenAI API 호출 실패", e);
             throw new CustomException("AI 서비스 호출에 실패했습니다.", HttpStatus.SERVICE_UNAVAILABLE);
         }
     }

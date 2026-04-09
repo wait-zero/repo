@@ -18,7 +18,18 @@
       "Bash(docker exec:*)",
       "Bash(ssh:*)",
       "Bash(scp:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(git stash:*)",
+      "Bash(flutter:*)",
+      "Bash(where flutter:*)",
+      "Read(//c/Users/sth90/flutter/bin/**)",
+      "Read(//c/flutter/bin/**)",
+      "Read(//c/src/flutter/bin/**)",
+      "Bash(cmd.exe /c \"where flutter\" 2>&1)",
+      "Bash(winget search:*)",
+      "Bash(unzip -q -o /c/Users/sth90/flutter.zip -d /c/Users/sth90/)",
+      "Bash(export PATH=\"/c/Users/sth90/flutter/bin:$PATH\")",
+      "Bash(cmd.exe /c \"netstat -an | findstr 3000\")"
     ]
   },
   "disabledMcpjsonServers": [
