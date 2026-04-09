@@ -38,6 +38,8 @@ _$OfficeDetailImpl _$$OfficeDetailImplFromJson(Map<String, dynamic> json) =>
       phone: json['phone'] as String?,
       operatingHours: json['operatingHours'] as String?,
       regionCode: json['regionCode'] as String?,
+      nightOperation: json['nightOperation'] as String?,
+      weekendOperation: json['weekendOperation'] as String?,
       queueStatus: json['queueStatus'] == null
           ? null
           : QueueStatus.fromJson(json['queueStatus'] as Map<String, dynamic>),
@@ -54,5 +56,7 @@ Map<String, dynamic> _$$OfficeDetailImplToJson(_$OfficeDetailImpl instance) =>
       'phone': instance.phone,
       'operatingHours': instance.operatingHours,
       'regionCode': instance.regionCode,
+      'nightOperation': instance.nightOperation,
+      'weekendOperation': instance.weekendOperation,
       'queueStatus': instance.queueStatus,
     };

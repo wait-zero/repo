@@ -92,7 +92,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       return OfficeCard(
                         office: offices[index],
                         onTap: () {
-                          context.go('/offices/${offices[index].id}');
+                          context.push('/offices/${offices[index].id}');
                         },
                       );
                     },

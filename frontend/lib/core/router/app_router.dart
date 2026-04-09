@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/home/screens/home_screen.dart';
-import '../../features/office/screens/office_list_screen.dart';
 import '../../features/office/screens/office_detail_screen.dart';
 import '../../features/registration/screens/pre_registration_screen.dart';
 import '../../features/registration/screens/my_registrations_screen.dart';
@@ -29,30 +28,20 @@ final appRouter = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/offices',
-              builder: (context, state) => const OfficeListScreen(),
-              routes: [
-                GoRoute(
-                  path: ':id',
-                  builder: (context, state) {
-                    final id =
-                        int.parse(state.pathParameters['id'] ?? '0');
-                    return OfficeDetailScreen(officeId: id);
-                  },
-                ),
-              ],
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
               path: '/my-registrations',
               builder: (context, state) => const MyRegistrationsScreen(),
             ),
           ],
         ),
       ],
+    ),
+    GoRoute(
+      path: '/offices/:id',
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) {
+        final id = int.parse(state.pathParameters['id'] ?? '0');
+        return OfficeDetailScreen(officeId: id);
+      },
     ),
     GoRoute(
       path: '/pre-register',
@@ -93,11 +82,6 @@ class ScaffoldWithNavBar extends StatelessWidget {
             icon: Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home),
             label: '홈',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.business_outlined),
-            selectedIcon: Icon(Icons.business),
-            label: '민원실',
           ),
           NavigationDestination(
             icon: Icon(Icons.list_alt_outlined),

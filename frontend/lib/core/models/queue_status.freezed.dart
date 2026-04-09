@@ -22,11 +22,12 @@ QueueStatus _$QueueStatusFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$QueueStatus {
   int get officeId => throw _privateConstructorUsedError;
-  int get waitingCount => throw _privateConstructorUsedError;
+  int get totalWaitingCount => throw _privateConstructorUsedError;
   int get estimatedWaitMinutes => throw _privateConstructorUsedError;
   String get congestionLevel => throw _privateConstructorUsedError;
   int get activeWindows => throw _privateConstructorUsedError;
   DateTime get updatedAt => throw _privateConstructorUsedError;
+  List<TaskStatus>? get tasks => throw _privateConstructorUsedError;
 
   /// Serializes this QueueStatus to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -47,11 +48,12 @@ abstract class $QueueStatusCopyWith<$Res> {
   @useResult
   $Res call({
     int officeId,
-    int waitingCount,
+    int totalWaitingCount,
     int estimatedWaitMinutes,
     String congestionLevel,
     int activeWindows,
     DateTime updatedAt,
+    List<TaskStatus>? tasks,
   });
 }
 
@@ -71,11 +73,12 @@ class _$QueueStatusCopyWithImpl<$Res, $Val extends QueueStatus>
   @override
   $Res call({
     Object? officeId = null,
-    Object? waitingCount = null,
+    Object? totalWaitingCount = null,
     Object? estimatedWaitMinutes = null,
     Object? congestionLevel = null,
     Object? activeWindows = null,
     Object? updatedAt = null,
+    Object? tasks = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -83,9 +86,9 @@ class _$QueueStatusCopyWithImpl<$Res, $Val extends QueueStatus>
                 ? _value.officeId
                 : officeId // ignore: cast_nullable_to_non_nullable
                       as int,
-            waitingCount: null == waitingCount
-                ? _value.waitingCount
-                : waitingCount // ignore: cast_nullable_to_non_nullable
+            totalWaitingCount: null == totalWaitingCount
+                ? _value.totalWaitingCount
+                : totalWaitingCount // ignore: cast_nullable_to_non_nullable
                       as int,
             estimatedWaitMinutes: null == estimatedWaitMinutes
                 ? _value.estimatedWaitMinutes
@@ -103,6 +106,10 @@ class _$QueueStatusCopyWithImpl<$Res, $Val extends QueueStatus>
                 ? _value.updatedAt
                 : updatedAt // ignore: cast_nullable_to_non_nullable
                       as DateTime,
+            tasks: freezed == tasks
+                ? _value.tasks
+                : tasks // ignore: cast_nullable_to_non_nullable
+                      as List<TaskStatus>?,
           )
           as $Val,
     );
@@ -120,11 +127,12 @@ abstract class _$$QueueStatusImplCopyWith<$Res>
   @useResult
   $Res call({
     int officeId,
-    int waitingCount,
+    int totalWaitingCount,
     int estimatedWaitMinutes,
     String congestionLevel,
     int activeWindows,
     DateTime updatedAt,
+    List<TaskStatus>? tasks,
   });
 }
 
@@ -143,11 +151,12 @@ class __$$QueueStatusImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? officeId = null,
-    Object? waitingCount = null,
+    Object? totalWaitingCount = null,
     Object? estimatedWaitMinutes = null,
     Object? congestionLevel = null,
     Object? activeWindows = null,
     Object? updatedAt = null,
+    Object? tasks = freezed,
   }) {
     return _then(
       _$QueueStatusImpl(
@@ -155,9 +164,9 @@ class __$$QueueStatusImplCopyWithImpl<$Res>
             ? _value.officeId
             : officeId // ignore: cast_nullable_to_non_nullable
                   as int,
-        waitingCount: null == waitingCount
-            ? _value.waitingCount
-            : waitingCount // ignore: cast_nullable_to_non_nullable
+        totalWaitingCount: null == totalWaitingCount
+            ? _value.totalWaitingCount
+            : totalWaitingCount // ignore: cast_nullable_to_non_nullable
                   as int,
         estimatedWaitMinutes: null == estimatedWaitMinutes
             ? _value.estimatedWaitMinutes
@@ -175,6 +184,10 @@ class __$$QueueStatusImplCopyWithImpl<$Res>
             ? _value.updatedAt
             : updatedAt // ignore: cast_nullable_to_non_nullable
                   as DateTime,
+        tasks: freezed == tasks
+            ? _value._tasks
+            : tasks // ignore: cast_nullable_to_non_nullable
+                  as List<TaskStatus>?,
       ),
     );
   }
@@ -185,12 +198,13 @@ class __$$QueueStatusImplCopyWithImpl<$Res>
 class _$QueueStatusImpl implements _QueueStatus {
   const _$QueueStatusImpl({
     required this.officeId,
-    required this.waitingCount,
+    required this.totalWaitingCount,
     required this.estimatedWaitMinutes,
     required this.congestionLevel,
     required this.activeWindows,
     required this.updatedAt,
-  });
+    final List<TaskStatus>? tasks,
+  }) : _tasks = tasks;
 
   factory _$QueueStatusImpl.fromJson(Map<String, dynamic> json) =>
       _$$QueueStatusImplFromJson(json);
@@ -198,7 +212,7 @@ class _$QueueStatusImpl implements _QueueStatus {
   @override
   final int officeId;
   @override
-  final int waitingCount;
+  final int totalWaitingCount;
   @override
   final int estimatedWaitMinutes;
   @override
@@ -207,10 +221,19 @@ class _$QueueStatusImpl implements _QueueStatus {
   final int activeWindows;
   @override
   final DateTime updatedAt;
+  final List<TaskStatus>? _tasks;
+  @override
+  List<TaskStatus>? get tasks {
+    final value = _tasks;
+    if (value == null) return null;
+    if (_tasks is EqualUnmodifiableListView) return _tasks;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
 
   @override
   String toString() {
-    return 'QueueStatus(officeId: $officeId, waitingCount: $waitingCount, estimatedWaitMinutes: $estimatedWaitMinutes, congestionLevel: $congestionLevel, activeWindows: $activeWindows, updatedAt: $updatedAt)';
+    return 'QueueStatus(officeId: $officeId, totalWaitingCount: $totalWaitingCount, estimatedWaitMinutes: $estimatedWaitMinutes, congestionLevel: $congestionLevel, activeWindows: $activeWindows, updatedAt: $updatedAt, tasks: $tasks)';
   }
 
   @override
@@ -220,8 +243,8 @@ class _$QueueStatusImpl implements _QueueStatus {
             other is _$QueueStatusImpl &&
             (identical(other.officeId, officeId) ||
                 other.officeId == officeId) &&
-            (identical(other.waitingCount, waitingCount) ||
-                other.waitingCount == waitingCount) &&
+            (identical(other.totalWaitingCount, totalWaitingCount) ||
+                other.totalWaitingCount == totalWaitingCount) &&
             (identical(other.estimatedWaitMinutes, estimatedWaitMinutes) ||
                 other.estimatedWaitMinutes == estimatedWaitMinutes) &&
             (identical(other.congestionLevel, congestionLevel) ||
@@ -229,7 +252,8 @@ class _$QueueStatusImpl implements _QueueStatus {
             (identical(other.activeWindows, activeWindows) ||
                 other.activeWindows == activeWindows) &&
             (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+                other.updatedAt == updatedAt) &&
+            const DeepCollectionEquality().equals(other._tasks, _tasks));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -237,11 +261,12 @@ class _$QueueStatusImpl implements _QueueStatus {
   int get hashCode => Object.hash(
     runtimeType,
     officeId,
-    waitingCount,
+    totalWaitingCount,
     estimatedWaitMinutes,
     congestionLevel,
     activeWindows,
     updatedAt,
+    const DeepCollectionEquality().hash(_tasks),
   );
 
   /// Create a copy of QueueStatus
@@ -261,11 +286,12 @@ class _$QueueStatusImpl implements _QueueStatus {
 abstract class _QueueStatus implements QueueStatus {
   const factory _QueueStatus({
     required final int officeId,
-    required final int waitingCount,
+    required final int totalWaitingCount,
     required final int estimatedWaitMinutes,
     required final String congestionLevel,
     required final int activeWindows,
     required final DateTime updatedAt,
+    final List<TaskStatus>? tasks,
   }) = _$QueueStatusImpl;
 
   factory _QueueStatus.fromJson(Map<String, dynamic> json) =
@@ -274,7 +300,7 @@ abstract class _QueueStatus implements QueueStatus {
   @override
   int get officeId;
   @override
-  int get waitingCount;
+  int get totalWaitingCount;
   @override
   int get estimatedWaitMinutes;
   @override
@@ -283,11 +309,267 @@ abstract class _QueueStatus implements QueueStatus {
   int get activeWindows;
   @override
   DateTime get updatedAt;
+  @override
+  List<TaskStatus>? get tasks;
 
   /// Create a copy of QueueStatus
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$QueueStatusImplCopyWith<_$QueueStatusImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+TaskStatus _$TaskStatusFromJson(Map<String, dynamic> json) {
+  return _TaskStatus.fromJson(json);
+}
+
+/// @nodoc
+mixin _$TaskStatus {
+  String? get taskNo => throw _privateConstructorUsedError;
+  String? get taskName => throw _privateConstructorUsedError;
+  int get waitingCount => throw _privateConstructorUsedError;
+  String? get callNumber => throw _privateConstructorUsedError;
+  String? get callCounterNo => throw _privateConstructorUsedError;
+
+  /// Serializes this TaskStatus to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of TaskStatus
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $TaskStatusCopyWith<TaskStatus> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $TaskStatusCopyWith<$Res> {
+  factory $TaskStatusCopyWith(
+    TaskStatus value,
+    $Res Function(TaskStatus) then,
+  ) = _$TaskStatusCopyWithImpl<$Res, TaskStatus>;
+  @useResult
+  $Res call({
+    String? taskNo,
+    String? taskName,
+    int waitingCount,
+    String? callNumber,
+    String? callCounterNo,
+  });
+}
+
+/// @nodoc
+class _$TaskStatusCopyWithImpl<$Res, $Val extends TaskStatus>
+    implements $TaskStatusCopyWith<$Res> {
+  _$TaskStatusCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of TaskStatus
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? taskNo = freezed,
+    Object? taskName = freezed,
+    Object? waitingCount = null,
+    Object? callNumber = freezed,
+    Object? callCounterNo = freezed,
+  }) {
+    return _then(
+      _value.copyWith(
+            taskNo: freezed == taskNo
+                ? _value.taskNo
+                : taskNo // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            taskName: freezed == taskName
+                ? _value.taskName
+                : taskName // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            waitingCount: null == waitingCount
+                ? _value.waitingCount
+                : waitingCount // ignore: cast_nullable_to_non_nullable
+                      as int,
+            callNumber: freezed == callNumber
+                ? _value.callNumber
+                : callNumber // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            callCounterNo: freezed == callCounterNo
+                ? _value.callCounterNo
+                : callCounterNo // ignore: cast_nullable_to_non_nullable
+                      as String?,
+          )
+          as $Val,
+    );
+  }
+}
+
+/// @nodoc
+abstract class _$$TaskStatusImplCopyWith<$Res>
+    implements $TaskStatusCopyWith<$Res> {
+  factory _$$TaskStatusImplCopyWith(
+    _$TaskStatusImpl value,
+    $Res Function(_$TaskStatusImpl) then,
+  ) = __$$TaskStatusImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({
+    String? taskNo,
+    String? taskName,
+    int waitingCount,
+    String? callNumber,
+    String? callCounterNo,
+  });
+}
+
+/// @nodoc
+class __$$TaskStatusImplCopyWithImpl<$Res>
+    extends _$TaskStatusCopyWithImpl<$Res, _$TaskStatusImpl>
+    implements _$$TaskStatusImplCopyWith<$Res> {
+  __$$TaskStatusImplCopyWithImpl(
+    _$TaskStatusImpl _value,
+    $Res Function(_$TaskStatusImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of TaskStatus
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? taskNo = freezed,
+    Object? taskName = freezed,
+    Object? waitingCount = null,
+    Object? callNumber = freezed,
+    Object? callCounterNo = freezed,
+  }) {
+    return _then(
+      _$TaskStatusImpl(
+        taskNo: freezed == taskNo
+            ? _value.taskNo
+            : taskNo // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        taskName: freezed == taskName
+            ? _value.taskName
+            : taskName // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        waitingCount: null == waitingCount
+            ? _value.waitingCount
+            : waitingCount // ignore: cast_nullable_to_non_nullable
+                  as int,
+        callNumber: freezed == callNumber
+            ? _value.callNumber
+            : callNumber // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        callCounterNo: freezed == callCounterNo
+            ? _value.callCounterNo
+            : callCounterNo // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$TaskStatusImpl implements _TaskStatus {
+  const _$TaskStatusImpl({
+    this.taskNo,
+    this.taskName,
+    required this.waitingCount,
+    this.callNumber,
+    this.callCounterNo,
+  });
+
+  factory _$TaskStatusImpl.fromJson(Map<String, dynamic> json) =>
+      _$$TaskStatusImplFromJson(json);
+
+  @override
+  final String? taskNo;
+  @override
+  final String? taskName;
+  @override
+  final int waitingCount;
+  @override
+  final String? callNumber;
+  @override
+  final String? callCounterNo;
+
+  @override
+  String toString() {
+    return 'TaskStatus(taskNo: $taskNo, taskName: $taskName, waitingCount: $waitingCount, callNumber: $callNumber, callCounterNo: $callCounterNo)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$TaskStatusImpl &&
+            (identical(other.taskNo, taskNo) || other.taskNo == taskNo) &&
+            (identical(other.taskName, taskName) ||
+                other.taskName == taskName) &&
+            (identical(other.waitingCount, waitingCount) ||
+                other.waitingCount == waitingCount) &&
+            (identical(other.callNumber, callNumber) ||
+                other.callNumber == callNumber) &&
+            (identical(other.callCounterNo, callCounterNo) ||
+                other.callCounterNo == callCounterNo));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    taskNo,
+    taskName,
+    waitingCount,
+    callNumber,
+    callCounterNo,
+  );
+
+  /// Create a copy of TaskStatus
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$TaskStatusImplCopyWith<_$TaskStatusImpl> get copyWith =>
+      __$$TaskStatusImplCopyWithImpl<_$TaskStatusImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$TaskStatusImplToJson(this);
+  }
+}
+
+abstract class _TaskStatus implements TaskStatus {
+  const factory _TaskStatus({
+    final String? taskNo,
+    final String? taskName,
+    required final int waitingCount,
+    final String? callNumber,
+    final String? callCounterNo,
+  }) = _$TaskStatusImpl;
+
+  factory _TaskStatus.fromJson(Map<String, dynamic> json) =
+      _$TaskStatusImpl.fromJson;
+
+  @override
+  String? get taskNo;
+  @override
+  String? get taskName;
+  @override
+  int get waitingCount;
+  @override
+  String? get callNumber;
+  @override
+  String? get callCounterNo;
+
+  /// Create a copy of TaskStatus
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$TaskStatusImplCopyWith<_$TaskStatusImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

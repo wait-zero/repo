@@ -21,7 +21,7 @@ class OfficeDetailScreen extends ConsumerWidget {
         title: const Text('민원실 상세'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/offices'),
+          onPressed: () => context.pop(),
         ),
       ),
       body: detailAsync.when(
@@ -76,6 +76,20 @@ class OfficeDetailScreen extends ConsumerWidget {
                             _InfoRow(
                               icon: Icons.access_time_outlined,
                               text: detail.operatingHours!,
+                            ),
+                          ],
+                          if (detail.nightOperation != null) ...[
+                            const SizedBox(height: 8),
+                            _InfoRow(
+                              icon: Icons.nightlight_outlined,
+                              text: '야간: ${detail.nightOperation!}',
+                            ),
+                          ],
+                          if (detail.weekendOperation != null) ...[
+                            const SizedBox(height: 8),
+                            _InfoRow(
+                              icon: Icons.weekend_outlined,
+                              text: '주말: ${detail.weekendOperation!}',
                             ),
                           ],
                         ],

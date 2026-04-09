@@ -32,6 +32,8 @@ class OfficeDetail with _$OfficeDetail {
     String? phone,
     String? operatingHours,
     String? regionCode,
+    String? nightOperation,
+    String? weekendOperation,
     QueueStatus? queueStatus,
   }) = _OfficeDetail;
 

@@ -320,6 +320,8 @@ mixin _$OfficeDetail {
   String? get phone => throw _privateConstructorUsedError;
   String? get operatingHours => throw _privateConstructorUsedError;
   String? get regionCode => throw _privateConstructorUsedError;
+  String? get nightOperation => throw _privateConstructorUsedError;
+  String? get weekendOperation => throw _privateConstructorUsedError;
   QueueStatus? get queueStatus => throw _privateConstructorUsedError;
 
   /// Serializes this OfficeDetail to a JSON map.
@@ -349,6 +351,8 @@ abstract class $OfficeDetailCopyWith<$Res> {
     String? phone,
     String? operatingHours,
     String? regionCode,
+    String? nightOperation,
+    String? weekendOperation,
     QueueStatus? queueStatus,
   });
 
@@ -379,6 +383,8 @@ class _$OfficeDetailCopyWithImpl<$Res, $Val extends OfficeDetail>
     Object? phone = freezed,
     Object? operatingHours = freezed,
     Object? regionCode = freezed,
+    Object? nightOperation = freezed,
+    Object? weekendOperation = freezed,
     Object? queueStatus = freezed,
   }) {
     return _then(
@@ -418,6 +424,14 @@ class _$OfficeDetailCopyWithImpl<$Res, $Val extends OfficeDetail>
             regionCode: freezed == regionCode
                 ? _value.regionCode
                 : regionCode // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            nightOperation: freezed == nightOperation
+                ? _value.nightOperation
+                : nightOperation // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            weekendOperation: freezed == weekendOperation
+                ? _value.weekendOperation
+                : weekendOperation // ignore: cast_nullable_to_non_nullable
                       as String?,
             queueStatus: freezed == queueStatus
                 ? _value.queueStatus
@@ -462,6 +476,8 @@ abstract class _$$OfficeDetailImplCopyWith<$Res>
     String? phone,
     String? operatingHours,
     String? regionCode,
+    String? nightOperation,
+    String? weekendOperation,
     QueueStatus? queueStatus,
   });
 
@@ -492,6 +508,8 @@ class __$$OfficeDetailImplCopyWithImpl<$Res>
     Object? phone = freezed,
     Object? operatingHours = freezed,
     Object? regionCode = freezed,
+    Object? nightOperation = freezed,
+    Object? weekendOperation = freezed,
     Object? queueStatus = freezed,
   }) {
     return _then(
@@ -532,6 +550,14 @@ class __$$OfficeDetailImplCopyWithImpl<$Res>
             ? _value.regionCode
             : regionCode // ignore: cast_nullable_to_non_nullable
                   as String?,
+        nightOperation: freezed == nightOperation
+            ? _value.nightOperation
+            : nightOperation // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        weekendOperation: freezed == weekendOperation
+            ? _value.weekendOperation
+            : weekendOperation // ignore: cast_nullable_to_non_nullable
+                  as String?,
         queueStatus: freezed == queueStatus
             ? _value.queueStatus
             : queueStatus // ignore: cast_nullable_to_non_nullable
@@ -554,6 +580,8 @@ class _$OfficeDetailImpl implements _OfficeDetail {
     this.phone,
     this.operatingHours,
     this.regionCode,
+    this.nightOperation,
+    this.weekendOperation,
     this.queueStatus,
   });
 
@@ -579,11 +607,15 @@ class _$OfficeDetailImpl implements _OfficeDetail {
   @override
   final String? regionCode;
   @override
+  final String? nightOperation;
+  @override
+  final String? weekendOperation;
+  @override
   final QueueStatus? queueStatus;
 
   @override
   String toString() {
-    return 'OfficeDetail(id: $id, name: $name, address: $address, detailAddress: $detailAddress, latitude: $latitude, longitude: $longitude, phone: $phone, operatingHours: $operatingHours, regionCode: $regionCode, queueStatus: $queueStatus)';
+    return 'OfficeDetail(id: $id, name: $name, address: $address, detailAddress: $detailAddress, latitude: $latitude, longitude: $longitude, phone: $phone, operatingHours: $operatingHours, regionCode: $regionCode, nightOperation: $nightOperation, weekendOperation: $weekendOperation, queueStatus: $queueStatus)';
   }
 
   @override
@@ -605,6 +637,10 @@ class _$OfficeDetailImpl implements _OfficeDetail {
                 other.operatingHours == operatingHours) &&
             (identical(other.regionCode, regionCode) ||
                 other.regionCode == regionCode) &&
+            (identical(other.nightOperation, nightOperation) ||
+                other.nightOperation == nightOperation) &&
+            (identical(other.weekendOperation, weekendOperation) ||
+                other.weekendOperation == weekendOperation) &&
             (identical(other.queueStatus, queueStatus) ||
                 other.queueStatus == queueStatus));
   }
@@ -622,6 +658,8 @@ class _$OfficeDetailImpl implements _OfficeDetail {
     phone,
     operatingHours,
     regionCode,
+    nightOperation,
+    weekendOperation,
     queueStatus,
   );
 
@@ -650,6 +688,8 @@ abstract class _OfficeDetail implements OfficeDetail {
     final String? phone,
     final String? operatingHours,
     final String? regionCode,
+    final String? nightOperation,
+    final String? weekendOperation,
     final QueueStatus? queueStatus,
   }) = _$OfficeDetailImpl;
 
@@ -674,6 +714,10 @@ abstract class _OfficeDetail implements OfficeDetail {
   String? get operatingHours;
   @override
   String? get regionCode;
+  @override
+  String? get nightOperation;
+  @override
+  String? get weekendOperation;
   @override
   QueueStatus? get queueStatus;
 

@@ -36,8 +36,8 @@ class QueueStatusCard extends StatelessWidget {
                 Expanded(
                   child: _StatusItem(
                     icon: Icons.people_outline,
-                    label: '대기 인원',
-                    value: '${status.waitingCount}명',
+                    label: '총 대기',
+                    value: '${status.totalWaitingCount}명',
                     color: color,
                   ),
                 ),
@@ -59,8 +59,74 @@ class QueueStatusCard extends StatelessWidget {
                 ),
               ],
             ),
+
+            // 업무별 대기현황
+            if (status.tasks != null && status.tasks!.isNotEmpty) ...[
+              const SizedBox(height: 20),
+              const Divider(),
+              const SizedBox(height: 12),
+              Text(
+                '업무별 대기 현황',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 12),
+              ...status.tasks!
+                  .where((t) => t.taskName != null && t.taskName!.isNotEmpty)
+                  .map((task) => _TaskRow(task: task)),
+            ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _TaskRow extends StatelessWidget {
+  final TaskStatus task;
+
+  const _TaskRow({required this.task});
+
+  @override
+  Widget build(BuildContext context) {
+    final hasWaiting = task.waitingCount > 0;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 3,
+            child: Text(
+              task.taskName ?? '',
+              style: Theme.of(context).textTheme.bodyMedium,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          SizedBox(
+            width: 60,
+            child: Text(
+              '${task.waitingCount}명',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: hasWaiting ? Colors.red : Colors.green,
+                  ),
+            ),
+          ),
+          if (task.callCounterNo != null && task.callCounterNo!.isNotEmpty)
+            SizedBox(
+              width: 60,
+              child: Text(
+                '${task.callCounterNo}번',
+                textAlign: TextAlign.end,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey[600],
+                    ),
+              ),
+            ),
+        ],
       ),
     );
   }

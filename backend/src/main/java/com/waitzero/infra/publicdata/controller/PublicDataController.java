@@ -17,4 +17,9 @@ public class PublicDataController {
     public ApiResponse<SyncResultResponse> sync() {
         return ApiResponse.ok(publicDataSyncService.syncOffices());
     }
+
+    @PostMapping("/sync-realtime")
+    public ApiResponse<SyncResultResponse> syncRealtime() {
+        return ApiResponse.ok(publicDataSyncService.syncRealtimeStatus());
+    }
 }

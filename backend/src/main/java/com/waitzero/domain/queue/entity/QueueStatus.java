@@ -26,6 +26,12 @@ public class QueueStatus {
     @JoinColumn(name = "office_id", nullable = false)
     private CivilServiceOffice office;
 
+    @Column(length = 10)
+    private String taskNo;
+
+    @Column(length = 100)
+    private String taskName;
+
     @Column(nullable = false)
     private int waitingCount;
 
@@ -39,18 +45,34 @@ public class QueueStatus {
     @Column(nullable = false)
     private int activeWindows = 1;
 
+    @Column(length = 20)
+    private String callNumber;
+
+    @Column(length = 20)
+    private String callCounterNo;
+
+    @Column(length = 20)
+    private String dataTimestamp;
+
     @LastModifiedDate
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
     @Builder
-    public QueueStatus(CivilServiceOffice office, int waitingCount, int estimatedWaitMinutes,
-                       CongestionLevel congestionLevel, int activeWindows) {
+    public QueueStatus(CivilServiceOffice office, String taskNo, String taskName,
+                       int waitingCount, int estimatedWaitMinutes,
+                       CongestionLevel congestionLevel, int activeWindows,
+                       String callNumber, String callCounterNo, String dataTimestamp) {
         this.office = office;
+        this.taskNo = taskNo;
+        this.taskName = taskName;
         this.waitingCount = waitingCount;
         this.estimatedWaitMinutes = estimatedWaitMinutes;
         this.congestionLevel = congestionLevel;
         this.activeWindows = activeWindows;
+        this.callNumber = callNumber;
+        this.callCounterNo = callCounterNo;
+        this.dataTimestamp = dataTimestamp;
     }
 
     public void updateStatus(int waitingCount, int estimatedWaitMinutes,
@@ -59,5 +81,22 @@ public class QueueStatus {
         this.estimatedWaitMinutes = estimatedWaitMinutes;
         this.congestionLevel = congestionLevel;
         this.activeWindows = activeWindows;
+    }
+
+    public void updateFromRealtimeApi(int waitingCount, String callNumber,
+                                       String callCounterNo, String dataTimestamp) {
+        this.waitingCount = waitingCount;
+        this.estimatedWaitMinutes = waitingCount * 5;
+        this.congestionLevel = calculateCongestion(waitingCount);
+        this.callNumber = callNumber;
+        this.callCounterNo = callCounterNo;
+        this.dataTimestamp = dataTimestamp;
+        this.activeWindows = (callCounterNo != null && !callCounterNo.isBlank()) ? 1 : 0;
+    }
+
+    private CongestionLevel calculateCongestion(int count) {
+        if (count <= 5) return CongestionLevel.LOW;
+        if (count <= 15) return CongestionLevel.MEDIUM;
+        return CongestionLevel.HIGH;
     }
 }
