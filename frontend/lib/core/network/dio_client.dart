@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/api_constants.dart';
+import '../../features/auth/providers/auth_providers.dart';
 
 final dioProvider = Provider<Dio>((ref) {
   final dio = Dio(
@@ -11,6 +12,16 @@ final dioProvider = Provider<Dio>((ref) {
       headers: {'Content-Type': 'application/json'},
     ),
   );
+
+  dio.interceptors.add(InterceptorsWrapper(
+    onRequest: (options, handler) {
+      final token = ref.read(authTokenProvider);
+      if (token != null) {
+        options.headers['Authorization'] = 'Bearer $token';
+      }
+      handler.next(options);
+    },
+  ));
 
   dio.interceptors.add(
     LogInterceptor(requestBody: true, responseBody: true),

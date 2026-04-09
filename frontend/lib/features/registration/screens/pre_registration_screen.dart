@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import '../../../core/constants/app_constants.dart';
 import '../../../core/models/category.dart';
 import '../../../core/models/pre_registration.dart';
 import '../../../core/repositories/pre_registration_repository.dart';
+import '../../auth/providers/auth_providers.dart';
 import '../providers/registration_providers.dart';
 import '../../../shared/widgets/loading_widget.dart';
 import '../../../shared/widgets/error_widget.dart';
@@ -341,9 +341,12 @@ class _PreRegistrationScreenState
 
     setState(() => _isSubmitting = true);
     try {
+      final userId = ref.read(currentUserIdProvider);
+      if (userId == null) return;
+
       final repo = ref.read(preRegistrationRepositoryProvider);
       final request = PreRegistrationRequest(
-        userId: AppConstants.defaultUserId,
+        userId: userId,
         officeId: widget.officeId!,
         categoryId: _selectedCategory!.id,
         content: _contentController.text.isEmpty

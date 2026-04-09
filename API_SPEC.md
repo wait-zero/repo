@@ -32,8 +32,23 @@
 |------|------|
 | 200 | 성공 |
 | 400 | 요청 검증 실패 (필수값 누락 등) |
+| 401 | 인증 필요 (JWT 토큰 없음/만료) |
+| 403 | 접근 권한 없음 |
 | 404 | 리소스를 찾을 수 없음 |
 | 500 | 서버 내부 오류 |
+
+### 인증
+JWT Bearer 토큰 인증을 사용한다. 보호된 엔드포인트에는 `Authorization: Bearer <token>` 헤더를 포함해야 한다.
+
+**공개 엔드포인트 (인증 불필요):**
+- `/api/auth/signup`, `/api/auth/login`
+- `/api/offices/**`, `/api/categories/**`
+- `/api/queue-status/**`, `/api/queue-history/**`
+- `/api/admin/**`, `/api/ai/**`
+
+**보호 엔드포인트 (JWT 필수):**
+- `/api/pre-registrations/**`
+- `/api/auth/me`
 
 ### 날짜/시간 형식
 | 타입 | 형식 | 예시 |
@@ -41,6 +56,104 @@
 | LocalDateTime | ISO 8601 | `2026-04-08T14:30:00` |
 | LocalDate | ISO 8601 | `2026-04-10` |
 | LocalTime | ISO 8601 | `14:00:00` |
+
+---
+
+## 0. 인증 API
+
+### 0-1. 회원가입
+
+```
+POST /api/auth/signup
+```
+
+**요청 바디:**
+```json
+{
+  "name": "홍길동",
+  "phone": "010-1234-5678",
+  "password": "1234"
+}
+```
+
+| 필드 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| name | String | O | 이름 |
+| phone | String | O | 전화번호 (고유) |
+| password | String | O | 비밀번호 |
+
+**응답:**
+```json
+{
+  "success": true,
+  "data": {
+    "token": "eyJhbGciOiJIUzM4NCJ9...",
+    "userId": 1,
+    "name": "홍길동",
+    "phone": "010-1234-5678"
+  },
+  "message": "회원가입이 완료되었습니다."
+}
+```
+
+---
+
+### 0-2. 로그인
+
+```
+POST /api/auth/login
+```
+
+**요청 바디:**
+```json
+{
+  "phone": "010-1234-5678",
+  "password": "1234"
+}
+```
+
+| 필드 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| phone | String | O | 전화번호 |
+| password | String | O | 비밀번호 |
+
+**응답:**
+```json
+{
+  "success": true,
+  "data": {
+    "token": "eyJhbGciOiJIUzM4NCJ9...",
+    "userId": 1,
+    "name": "홍길동",
+    "phone": "010-1234-5678"
+  },
+  "message": "로그인 성공"
+}
+```
+
+---
+
+### 0-3. 내 정보 조회
+
+```
+GET /api/auth/me
+```
+
+**헤더:** `Authorization: Bearer <token>` (필수)
+
+**응답:**
+```json
+{
+  "success": true,
+  "data": {
+    "token": null,
+    "userId": 1,
+    "name": "홍길동",
+    "phone": "010-1234-5678"
+  },
+  "message": "요청이 처리되었습니다."
+}
+```
 
 ---
 
@@ -209,6 +322,53 @@ GET /api/queue-status/{officeId}
 
 ---
 
+## 2-2. 대기 추세 분석
+
+```
+GET /api/queue-history/{officeId}/trends
+```
+
+**Path Parameters:**
+| 파라미터 | 타입 | 설명 |
+|---------|------|------|
+| officeId | Long | 민원실 ID |
+
+**응답:**
+```json
+{
+  "success": true,
+  "data": {
+    "officeId": 1,
+    "dataPoints": [
+      {
+        "dayOfWeek": 1,
+        "dayLabel": "월",
+        "hourOfDay": 9,
+        "averageWaitingCount": 8.5
+      },
+      {
+        "dayOfWeek": 1,
+        "dayLabel": "월",
+        "hourOfDay": 10,
+        "averageWaitingCount": 18.2
+      }
+    ]
+  },
+  "message": "요청이 처리되었습니다."
+}
+```
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| dayOfWeek | int | 요일 (1=월 ~ 7=일, ISO) |
+| dayLabel | String | 요일 한글 라벨 ("월"~"일") |
+| hourOfDay | int | 시간 (0~23) |
+| averageWaitingCount | double | 평균 대기인원 |
+
+> 최근 4주 이력 데이터를 기반으로 요일/시간대별 평균 대기인원을 계산한다.
+
+---
+
 ## 3. 카테고리 API
 
 ### 3-1. 카테고리 목록 조회
@@ -335,6 +495,20 @@ GET /api/pre-registrations/user/{userId}
 | userId | Long | 사용자 ID |
 
 **응답:** PreRegistrationResponse 배열 (최신순 정렬)
+
+---
+
+### 4-3b. 내 선 정보 목록 (JWT 인증)
+
+```
+GET /api/pre-registrations/me
+```
+
+**헤더:** `Authorization: Bearer <token>` (필수)
+
+**응답:** PreRegistrationResponse 배열 (JWT 토큰의 userId 기반)
+
+> 4-3과 동일한 응답 형식. JWT에서 userId를 자동 추출하므로 Path Parameter 불필요.
 
 ---
 
@@ -561,6 +735,31 @@ class AiClassifyResult {
 ```dart
 class AiSummarizeResult {
   final String summary;
+}
+```
+
+#### AuthResponse → AuthResult 모델
+```dart
+class AuthResult {
+  final String? token;
+  final int userId;
+  final String name;
+  final String phone;
+}
+```
+
+#### QueueTrendResponse → QueueTrend 모델
+```dart
+class QueueTrend {
+  final int officeId;
+  final List<TrendDataPoint> dataPoints;
+}
+
+class TrendDataPoint {
+  final int dayOfWeek;
+  final String dayLabel;
+  final int hourOfDay;
+  final double averageWaitingCount;
 }
 ```
 

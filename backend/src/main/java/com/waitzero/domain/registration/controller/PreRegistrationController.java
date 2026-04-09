@@ -7,6 +7,7 @@ import com.waitzero.domain.registration.service.PreRegistrationService;
 import com.waitzero.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,6 +31,12 @@ public class PreRegistrationController {
 
     @GetMapping("/user/{userId}")
     public ApiResponse<List<PreRegistrationResponse>> getByUserId(@PathVariable Long userId) {
+        return ApiResponse.ok(preRegistrationService.getByUserId(userId));
+    }
+
+    @GetMapping("/me")
+    public ApiResponse<List<PreRegistrationResponse>> getMyRegistrations(Authentication authentication) {
+        Long userId = (Long) authentication.getPrincipal();
         return ApiResponse.ok(preRegistrationService.getByUserId(userId));
     }
 

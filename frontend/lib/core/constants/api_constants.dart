@@ -25,4 +25,14 @@ class ApiConstants {
   // AI
   static const String aiClassify = '/api/ai/classify';
   static const String aiSummarize = '/api/ai/summarize';
+
+  // Auth
+  static const String authLogin = '/api/auth/login';
+  static const String authSignup = '/api/auth/signup';
+  static const String authMe = '/api/auth/me';
+  static const String myPreRegistrations = '/api/pre-registrations/me';
+
+  // Queue Trends
+  static String queueTrends(int officeId) =>
+      '/api/queue-history/$officeId/trends';
 }
