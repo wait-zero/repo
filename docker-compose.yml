@@ -16,6 +16,12 @@ services:
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
+      - --innodb-buffer-pool-size=64M
+      - --key-buffer-size=16M
+    deploy:
+      resources:
+        limits:
+          memory: 256m
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 5s
@@ -37,7 +43,12 @@ services:
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       PUBLIC_DATA_API_KEY: ${PUBLIC_DATA_API_KEY}
+      PUBLIC_DATA_BASE_URL: ${PUBLIC_DATA_BASE_URL:-https://apis.data.go.kr/B551982/cso_v2}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+    deploy:
+      resources:
+        limits:
+          memory: 512m
     depends_on:
       mysql:
         condition: service_healthy
