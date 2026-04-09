@@ -2,6 +2,10 @@
 # 서버 배포 스크립트
 set -e
 
+# non-interactive SSH 세션에서 docker compose 플러그인 경로 보장
+export PATH=$PATH:/usr/lib/docker/cli-plugins:/usr/local/bin:/usr/libexec/docker/cli-plugins
+source ~/.bashrc 2>/dev/null || true
+
 cd ~/waitzero
 
 # swap 확인
