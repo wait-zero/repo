@@ -37,4 +37,4 @@ ai:
 # Public Data
 publicdata:
   api-key: ${PUBLIC_DATA_API_KEY:}
-  base-url: ${PUBLIC_DATA_BASE_URL:https://api.odcloud.kr/api}
+  base-url: ${PUBLIC_DATA_BASE_URL:https://apis.data.go.kr/B551982/cso_v2}

@@ -20,5 +20,8 @@
       "Bash(scp:*)",
       "Bash(curl:*)"
     ]
-  }
+  },
+  "disabledMcpjsonServers": [
+    "chzzk-ideas"
+  ]
 }

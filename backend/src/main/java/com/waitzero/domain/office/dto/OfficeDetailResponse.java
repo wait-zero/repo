@@ -13,6 +13,8 @@ public record OfficeDetailResponse(
         String phone,
         String operatingHours,
         String regionCode,
+        String nightOperation,
+        String weekendOperation,
         QueueStatusResponse queueStatus
 ) {
     public static OfficeDetailResponse from(CivilServiceOffice office, QueueStatusResponse queueStatus) {
@@ -26,6 +28,8 @@ public record OfficeDetailResponse(
                 office.getPhone(),
                 office.getOperatingHours(),
                 office.getRegionCode(),
+                office.getNightOperation(),
+                office.getWeekendOperation(),
                 queueStatus
         );
     }

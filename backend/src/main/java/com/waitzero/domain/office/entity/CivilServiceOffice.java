@@ -36,13 +36,23 @@ public class CivilServiceOffice extends BaseTimeEntity {
     @Column(length = 100)
     private String operatingHours;
 
-    @Column(length = 10)
+    @Column(length = 20)
     private String regionCode;
+
+    @Column(length = 50, unique = true)
+    private String csoSn;
+
+    @Column(length = 255)
+    private String nightOperation;
+
+    @Column(length = 255)
+    private String weekendOperation;
 
     @Builder
     public CivilServiceOffice(String name, String address, String detailAddress,
                               Double latitude, Double longitude, String phone,
-                              String operatingHours, String regionCode) {
+                              String operatingHours, String regionCode, String csoSn,
+                              String nightOperation, String weekendOperation) {
         this.name = name;
         this.address = address;
         this.detailAddress = detailAddress;
@@ -51,5 +61,21 @@ public class CivilServiceOffice extends BaseTimeEntity {
         this.phone = phone;
         this.operatingHours = operatingHours;
         this.regionCode = regionCode;
+        this.csoSn = csoSn;
+        this.nightOperation = nightOperation;
+        this.weekendOperation = weekendOperation;
+    }
+
+    public void updateFromApi(String name, String address, Double latitude, Double longitude,
+                              String operatingHours, String regionCode,
+                              String nightOperation, String weekendOperation) {
+        this.name = name;
+        this.address = address;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.operatingHours = operatingHours;
+        this.regionCode = regionCode;
+        this.nightOperation = nightOperation;
+        this.weekendOperation = weekendOperation;
     }
 }
