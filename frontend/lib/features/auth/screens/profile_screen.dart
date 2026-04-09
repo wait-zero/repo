@@ -68,7 +68,7 @@ class ProfileScreen extends ConsumerWidget {
                   title: const Text('앱 정보'),
                   subtitle: const Text('WaitZero v1.0.0'),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () {},
+                  onTap: () => context.push('/about'),
                 ),
               ],
             ),
@@ -159,6 +159,14 @@ class ProfileScreen extends ConsumerWidget {
                 TextButton(
                   onPressed: () => context.push('/signup'),
                   child: const Text('회원가입'),
+                ),
+                const SizedBox(height: 16),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.info_outlined),
+                  title: const Text('앱 정보'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/about'),
                 ),
               ],
             ),

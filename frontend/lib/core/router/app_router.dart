@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/providers/auth_providers.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/signup_screen.dart';
+import '../../features/auth/screens/about_screen.dart';
 import '../../features/auth/screens/profile_screen.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/office/screens/office_detail_screen.dart';
@@ -88,6 +89,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/voice-input',
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const VoiceInputScreen(),
+      ),
+      GoRoute(
+        path: '/about',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const AboutScreen(),
       ),
       GoRoute(
         path: '/login',
