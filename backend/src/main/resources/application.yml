@@ -34,6 +34,10 @@ ai:
     model: ${CLAUDE_MODEL:claude-sonnet-4-20250514}
     base-url: ${CLAUDE_BASE_URL:https://api.anthropic.com}
 
+# JWT
+jwt:
+  secret: waitzero-contest-jwt-secret-key-2026-must-be-at-least-256-bits
+
 # Public Data
 publicdata:
   api-key: ${PUBLIC_DATA_API_KEY:}

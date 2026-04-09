@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/office_providers.dart';
 import '../widgets/queue_status_card.dart';
+import '../widgets/trend_chart_widget.dart';
 import '../../../shared/widgets/loading_widget.dart';
 import '../../../shared/widgets/error_widget.dart';
 
@@ -117,6 +118,39 @@ class OfficeDetailScreen extends ConsumerWidget {
                         ),
                       ),
                     ),
+
+                  const SizedBox(height: 16),
+
+                  // 혼잡도 추세 카드
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.trending_up,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .primary),
+                              const SizedBox(width: 8),
+                              Text(
+                                '혼잡도 추세',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                        fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          TrendChartWidget(officeId: officeId),
+                        ],
+                      ),
+                    ),
+                  ),
 
                   const SizedBox(height: 16),
 

@@ -43,6 +43,12 @@ class PreRegistrationRepository {
     return [];
   }
 
+  Future<List<PreRegistration>> getMyRegistrations() async {
+    final response = await _dio.get(ApiConstants.myPreRegistrations);
+    return extractDataList(
+        response.data as Map<String, dynamic>, PreRegistration.fromJson);
+  }
+
   Future<PreRegistration> updateStatus(int id, String status) async {
     final response = await _dio.patch(
       ApiConstants.preRegistrationStatus(id),

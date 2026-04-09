@@ -23,9 +23,13 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false, unique = true, length = 20)
     private String phone;
 
+    @Column(nullable = false)
+    private String password;
+
     @Builder
-    public User(String name, String phone) {
+    public User(String name, String phone, String password) {
         this.name = name;
         this.phone = phone;
+        this.password = password;
     }
 }
