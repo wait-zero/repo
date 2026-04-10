@@ -1,5 +1,13 @@
 class ApiConstants {
-  static const String baseUrl = 'http://localhost:8080';
+  /// 프로덕션 빌드에서는 빈 문자열로 오버라이드되어 상대 경로 호출.
+  /// Nginx가 `/api/*`를 백엔드로 리버스 프록시하므로 동일 오리진에서 동작.
+  ///
+  /// 로컬 개발: 기본값 `http://localhost:8080`
+  /// 프로덕션: `flutter build web --dart-define=API_BASE_URL=`
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://localhost:8080',
+  );
 
   // Offices
   static const String offices = '/api/offices';
