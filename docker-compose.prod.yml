@@ -65,6 +65,7 @@ services:
     volumes:
       - certbot-etc:/etc/letsencrypt
       - certbot-var:/var/lib/letsencrypt
+      - certbot-www:/var/www/certbot
     deploy:
       resources:
         limits:
@@ -72,7 +73,16 @@ services:
     depends_on:
       - backend
 
+  certbot:
+    image: certbot/certbot
+    container_name: waitzero-certbot
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - certbot-www:/var/www/certbot
+
 volumes:
   waitzero-mysql-data:
   certbot-etc:
   certbot-var:
+  certbot-www:

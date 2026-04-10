@@ -1,5 +1,5 @@
 #!/bin/bash
-# 서버 배포 스크립트 — CI에서 빌드된 JAR + Flutter Web을 받아서 실행
+# 서버 배포 스크립트
 set -e
 
 cd ~/waitzero
@@ -15,6 +15,18 @@ if [ ! -f .env ]; then
   echo ".env file not found at ~/waitzero/.env"
   exit 1
 fi
+
+# SSL 인증서 유무에 따라 nginx 설정 선택
+if docker volume inspect waitzero_certbot-etc > /dev/null 2>&1 && \
+   docker run --rm -v waitzero_certbot-etc:/etc/letsencrypt alpine test -f /etc/letsencrypt/live/waitzero.site/fullchain.pem 2>/dev/null; then
+  echo "SSL cert found → HTTPS mode"
+  cp nginx/nginx.conf nginx/nginx.active.conf
+else
+  echo "No SSL cert → HTTP-only mode"
+  cp nginx/nginx.init.conf nginx/nginx.active.conf
+fi
+# deploy에서 사용할 설정으로 교체
+cp nginx/nginx.active.conf nginx/nginx.conf
 
 # 배포
 docker compose down || true

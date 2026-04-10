@@ -41,13 +41,15 @@ jobs:
 
       - name: Prepare deploy package
         run: |
-          mkdir -p deploy/nginx/html
+          mkdir -p deploy/nginx/html deploy/scripts
           cp backend/build/libs/*.jar deploy/app.jar
           cp backend/Dockerfile.prod deploy/Dockerfile
           cp docker-compose.prod.yml deploy/docker-compose.yml
           cp scripts/deploy.sh deploy/deploy.sh
           cp nginx/nginx.conf deploy/nginx/nginx.conf
+          cp nginx/nginx.init.conf deploy/nginx/nginx.init.conf
           cp nginx/Dockerfile deploy/nginx/Dockerfile
+          cp scripts/init-ssl.sh deploy/scripts/init-ssl.sh
           cp -r frontend/build/web/* deploy/nginx/html/
 
       - name: Copy to server
