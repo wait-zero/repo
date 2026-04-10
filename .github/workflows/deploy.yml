@@ -10,20 +10,39 @@ on:
       - '.github/workflows/deploy.yml'
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Copy files to server
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Build JAR
+        working-directory: backend
+        run: chmod +x gradlew && ./gradlew bootJar --no-daemon
+
+      - name: Prepare deploy package
+        run: |
+          mkdir -p deploy
+          cp backend/build/libs/*.jar deploy/app.jar
+          cp backend/Dockerfile.prod deploy/Dockerfile
+          cp docker-compose.prod.yml deploy/docker-compose.yml
+          cp scripts/deploy.sh deploy/deploy.sh
+
+      - name: Copy to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "backend/,docker-compose.yml,scripts/"
+          source: "deploy/*"
           target: ~/waitzero
+          strip_components: 1
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.2.0
@@ -31,4 +50,5 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          script: chmod +x ~/waitzero/scripts/deploy.sh && bash ~/waitzero/scripts/deploy.sh
+          command_timeout: 5m
+          script: chmod +x ~/waitzero/deploy.sh && bash ~/waitzero/deploy.sh

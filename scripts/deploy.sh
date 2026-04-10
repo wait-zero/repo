@@ -1,10 +1,6 @@
 #!/bin/bash
-# 서버 배포 스크립트
+# 서버 배포 스크립트 — CI에서 빌드된 JAR을 받아서 실행
 set -e
-
-# non-interactive SSH 세션에서 docker compose 플러그인 경로 보장
-export PATH=$PATH:/usr/lib/docker/cli-plugins:/usr/local/bin:/usr/libexec/docker/cli-plugins
-source ~/.bashrc 2>/dev/null || true
 
 cd ~/waitzero
 
@@ -20,8 +16,8 @@ if [ ! -f .env ]; then
   exit 1
 fi
 
-# 빌드 & 배포
-docker compose down
+# 배포
+docker compose down || true
 docker compose up -d --build
 
 # 헬스체크 대기
