@@ -5,7 +5,9 @@ on:
     branches: [main]
     paths:
       - 'backend/**'
-      - 'docker-compose.yml'
+      - 'frontend/**'
+      - 'nginx/**'
+      - 'docker-compose.prod.yml'
       - 'scripts/deploy.sh'
       - '.github/workflows/deploy.yml'
 
@@ -22,17 +24,31 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Build JAR
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Build Backend JAR
         working-directory: backend
         run: chmod +x gradlew && ./gradlew bootJar --no-daemon
 
+      - name: Build Flutter Web
+        working-directory: frontend
+        run: |
+          flutter pub get
+          flutter build web --release
+
       - name: Prepare deploy package
         run: |
-          mkdir -p deploy
+          mkdir -p deploy/nginx/html
           cp backend/build/libs/*.jar deploy/app.jar
           cp backend/Dockerfile.prod deploy/Dockerfile
           cp docker-compose.prod.yml deploy/docker-compose.yml
           cp scripts/deploy.sh deploy/deploy.sh
+          cp nginx/nginx.conf deploy/nginx/nginx.conf
+          cp nginx/Dockerfile deploy/nginx/Dockerfile
+          cp -r frontend/build/web/* deploy/nginx/html/
 
       - name: Copy to server
         uses: appleboy/scp-action@v0.1.7

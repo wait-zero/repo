@@ -34,8 +34,8 @@ services:
       dockerfile: Dockerfile
     container_name: waitzero-backend
     restart: unless-stopped
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     environment:
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
@@ -53,5 +53,26 @@ services:
       mysql:
         condition: service_healthy
 
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: waitzero-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+    depends_on:
+      - backend
+
 volumes:
   waitzero-mysql-data:
+  certbot-etc:
+  certbot-var:

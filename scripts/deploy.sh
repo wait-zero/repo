@@ -1,5 +1,5 @@
 #!/bin/bash
-# 서버 배포 스크립트 — CI에서 빌드된 JAR을 받아서 실행
+# 서버 배포 스크립트 — CI에서 빌드된 JAR + Flutter Web을 받아서 실행
 set -e
 
 cd ~/waitzero
@@ -26,11 +26,13 @@ sleep 10
 
 MYSQL_RUNNING=$(docker inspect --format='{{.State.Running}}' waitzero-mysql 2>/dev/null || echo "false")
 BACKEND_RUNNING=$(docker inspect --format='{{.State.Running}}' waitzero-backend 2>/dev/null || echo "false")
+NGINX_RUNNING=$(docker inspect --format='{{.State.Running}}' waitzero-nginx 2>/dev/null || echo "false")
 
 echo "MySQL running: $MYSQL_RUNNING"
 echo "Backend running: $BACKEND_RUNNING"
+echo "Nginx running: $NGINX_RUNNING"
 
-if [ "$MYSQL_RUNNING" = "true" ] && [ "$BACKEND_RUNNING" = "true" ]; then
+if [ "$MYSQL_RUNNING" = "true" ] && [ "$BACKEND_RUNNING" = "true" ] && [ "$NGINX_RUNNING" = "true" ]; then
   echo "All containers are running. Deploy successful!"
   exit 0
 fi
