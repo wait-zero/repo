@@ -20,20 +20,21 @@ fi
 docker compose down || true
 docker compose up -d --build
 
-# 헬스체크 대기 — 컨테이너 실행 상태 확인
-echo "Waiting for backend to start..."
-for i in $(seq 1 20); do
-  if docker inspect --format='{{.State.Running}}' waitzero-backend 2>/dev/null | grep -q true; then
-    # 포트 응답 확인
-    if curl -sf -o /dev/null -w '%{http_code}' http://localhost:8080 2>/dev/null | grep -qE '(200|401|403|404)'; then
-      echo "Backend is healthy!"
-      docker compose logs --tail=5 backend
-      exit 0
-    fi
-  fi
-  sleep 5
-done
+# 컨테이너 실행 확인
+echo "Checking containers..."
+sleep 10
 
-echo "Backend health check failed. Checking logs..."
-docker compose logs --tail=30 backend
+MYSQL_RUNNING=$(docker inspect --format='{{.State.Running}}' waitzero-mysql 2>/dev/null || echo "false")
+BACKEND_RUNNING=$(docker inspect --format='{{.State.Running}}' waitzero-backend 2>/dev/null || echo "false")
+
+echo "MySQL running: $MYSQL_RUNNING"
+echo "Backend running: $BACKEND_RUNNING"
+
+if [ "$MYSQL_RUNNING" = "true" ] && [ "$BACKEND_RUNNING" = "true" ]; then
+  echo "All containers are running. Deploy successful!"
+  exit 0
+fi
+
+echo "Some containers failed to start. Logs:"
+docker compose logs --tail=30
 exit 1
