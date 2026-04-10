@@ -20,16 +20,20 @@ fi
 docker compose down || true
 docker compose up -d --build
 
-# 헬스체크 대기
+# 헬스체크 대기 — 컨테이너 실행 상태 확인
 echo "Waiting for backend to start..."
-for i in $(seq 1 30); do
-  if curl -sf http://localhost:8080/actuator/health > /dev/null 2>&1 || curl -sf http://localhost:8080 > /dev/null 2>&1; then
-    echo "Backend is healthy!"
-    exit 0
+for i in $(seq 1 20); do
+  if docker inspect --format='{{.State.Running}}' waitzero-backend 2>/dev/null | grep -q true; then
+    # 포트 응답 확인
+    if curl -sf -o /dev/null -w '%{http_code}' http://localhost:8080 2>/dev/null | grep -qE '(200|401|403|404)'; then
+      echo "Backend is healthy!"
+      docker compose logs --tail=5 backend
+      exit 0
+    fi
   fi
   sleep 5
 done
 
 echo "Backend health check failed. Checking logs..."
-docker compose logs --tail=50 backend
+docker compose logs --tail=30 backend
 exit 1
