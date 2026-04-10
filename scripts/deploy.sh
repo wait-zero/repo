@@ -17,16 +17,15 @@ if [ ! -f .env ]; then
 fi
 
 # SSL 인증서 유무에 따라 nginx 설정 선택
+# Dockerfile은 nginx/default.conf를 사용 — 원본 nginx.conf/nginx.init.conf는 절대 건드리지 않음
 if docker volume inspect waitzero_certbot-etc > /dev/null 2>&1 && \
    docker run --rm -v waitzero_certbot-etc:/etc/letsencrypt alpine test -f /etc/letsencrypt/live/waitzero.site/fullchain.pem 2>/dev/null; then
   echo "SSL cert found → HTTPS mode"
-  cp nginx/nginx.conf nginx/nginx.active.conf
+  cp nginx/nginx.conf nginx/default.conf
 else
   echo "No SSL cert → HTTP-only mode"
-  cp nginx/nginx.init.conf nginx/nginx.active.conf
+  cp nginx/nginx.init.conf nginx/default.conf
 fi
-# deploy에서 사용할 설정으로 교체
-cp nginx/nginx.active.conf nginx/nginx.conf
 
 # 배포
 docker compose down || true
