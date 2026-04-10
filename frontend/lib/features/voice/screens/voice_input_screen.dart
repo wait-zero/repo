@@ -270,7 +270,7 @@ class _VoiceInputScreenState extends ConsumerState<VoiceInputScreen> {
                           'voiceText': _editController.text.trim(),
                           'content': _classifyResult?.summary ??
                               _editController.text.trim(),
-                          'categoryName': _classifyResult?.category,
+                          'taskName': _classifyResult?.category,
                         });
                       },
                 child: const Text('적용'),

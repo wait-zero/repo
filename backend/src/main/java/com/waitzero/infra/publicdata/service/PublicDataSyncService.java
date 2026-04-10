@@ -1,74 +1,50 @@
 package com.waitzero.infra.publicdata.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.waitzero.domain.office.entity.CivilServiceOffice;
 import com.waitzero.domain.office.repository.OfficeRepository;
+import com.waitzero.domain.queue.entity.CongestionLevel;
 import com.waitzero.domain.queue.entity.QueueStatus;
 import com.waitzero.domain.queue.repository.QueueStatusRepository;
+import com.waitzero.infra.publicdata.client.PublicDataClient;
 import com.waitzero.infra.publicdata.dto.CsoInfoItem;
 import com.waitzero.infra.publicdata.dto.CsoRealtimeItem;
-import com.waitzero.infra.publicdata.dto.PublicDataApiResponse;
 import com.waitzero.infra.publicdata.dto.SyncResultResponse;
-import com.waitzero.global.exception.CustomException;
+import com.waitzero.infra.publicdata.entity.SupportedRegion;
+import com.waitzero.infra.publicdata.repository.SupportedRegionRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
+/**
+ * 공공데이터 동기화 서비스 — 지원 지자체를 순회하며 기본정보/실시간 현황을 DB에 적재.
+ *
+ * 주의: 실시간 현황 DB 저장은 "초기 부트스트랩" 용도로만 유지되며,
+ *       운영 중에는 {@link RealtimeStatusService}가 캐시 기반으로 직접 조회한다.
+ */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class PublicDataSyncService {
 
     private final OfficeRepository officeRepository;
     private final QueueStatusRepository queueStatusRepository;
-    private final ObjectMapper objectMapper;
-    private final String encodedApiKey;
-    private final String baseUrl;
-
-    public PublicDataSyncService(
-            @Value("${publicdata.api-key}") String apiKey,
-            @Value("${publicdata.base-url}") String baseUrl,
-            OfficeRepository officeRepository,
-            QueueStatusRepository queueStatusRepository,
-            ObjectMapper objectMapper) {
-        this.officeRepository = officeRepository;
-        this.queueStatusRepository = queueStatusRepository;
-        this.objectMapper = objectMapper;
-        this.encodedApiKey = URLEncoder.encode(apiKey, StandardCharsets.UTF_8);
-        this.baseUrl = baseUrl;
-    }
+    private final SupportedRegionRepository supportedRegionRepository;
+    private final PublicDataClient publicDataClient;
 
     @Transactional
     public SyncResultResponse syncOffices() {
-        try {
-            String url = baseUrl + "/cso_info_v2?serviceKey=" + encodedApiKey
-                    + "&pageNo=1&numOfRows=500&type=json";
-            log.info("민원실 기본정보 동기화 시작");
+        log.info("민원실 기본정보 동기화 시작");
+        List<SupportedRegion> regions = supportedRegionRepository.findAllByEnabledTrue();
+        int total = 0, newCount = 0, updateCount = 0;
 
-            String json = curlFetch(url);
-            PublicDataApiResponse<CsoInfoItem> response = objectMapper.readValue(json,
-                    objectMapper.getTypeFactory().constructParametricType(
-                            PublicDataApiResponse.class, CsoInfoItem.class));
-
-            if (response == null || response.body() == null
-                    || response.body().items() == null
-                    || response.body().items().item() == null) {
-                return new SyncResultResponse(0, 0, 0, "응답 데이터가 없습니다.");
-            }
-
-            List<CsoInfoItem> items = response.body().items().item();
-            int newCount = 0, updateCount = 0;
-
+        for (SupportedRegion region : regions) {
+            List<CsoInfoItem> items = publicDataClient.fetchOfficeInfoByRegion(region.getStdgCd());
             for (CsoInfoItem item : items) {
                 if (item.csoSn() == null || item.csoSn().isBlank()) continue;
+                total++;
 
                 String operatingHours = formatOperatingHours(item.wkdyOperBgngTm(), item.wkdyOperEndTm());
                 Double lat = parseDouble(item.lat());
@@ -98,40 +74,24 @@ public class PublicDataSyncService {
                     newCount++;
                 }
             }
-
-            log.info("민원실 기본정보 동기화 완료: 총 {}건, 신규 {}건, 갱신 {}건", items.size(), newCount, updateCount);
-            return new SyncResultResponse(items.size(), newCount, updateCount,
-                    "민원실 기본정보 동기화가 완료되었습니다.");
-        } catch (Exception e) {
-            log.error("민원실 기본정보 동기화 실패", e);
-            throw new CustomException("민원실 기본정보 동기화에 실패했습니다: " + e.getMessage(),
-                    HttpStatus.SERVICE_UNAVAILABLE);
         }
+
+        log.info("민원실 기본정보 동기화 완료: 총 {}건, 신규 {}건, 갱신 {}건", total, newCount, updateCount);
+        return new SyncResultResponse(total, newCount, updateCount,
+                "민원실 기본정보 동기화가 완료되었습니다.");
     }
 
     @Transactional
     public SyncResultResponse syncRealtimeStatus() {
-        try {
-            String url = baseUrl + "/cso_realtime_v2?serviceKey=" + encodedApiKey
-                    + "&pageNo=1&numOfRows=500&type=json";
-            log.info("실시간 대기현황 동기화 시작");
+        log.info("실시간 대기현황 동기화 시작 (지원 지역 순회)");
+        List<SupportedRegion> regions = supportedRegionRepository.findAllByEnabledTrue();
+        int total = 0, newCount = 0, updateCount = 0;
 
-            String json = curlFetch(url);
-            PublicDataApiResponse<CsoRealtimeItem> response = objectMapper.readValue(json,
-                    objectMapper.getTypeFactory().constructParametricType(
-                            PublicDataApiResponse.class, CsoRealtimeItem.class));
-
-            if (response == null || response.body() == null
-                    || response.body().items() == null
-                    || response.body().items().item() == null) {
-                return new SyncResultResponse(0, 0, 0, "실시간 데이터가 없습니다.");
-            }
-
-            List<CsoRealtimeItem> items = response.body().items().item();
-            int newCount = 0, updateCount = 0;
-
+        for (SupportedRegion region : regions) {
+            List<CsoRealtimeItem> items = publicDataClient.fetchRealtimeByRegion(region.getStdgCd());
             for (CsoRealtimeItem item : items) {
                 if (item.csoSn() == null || item.csoSn().isBlank()) continue;
+                total++;
 
                 var officeOpt = officeRepository.findByCsoSn(item.csoSn());
                 if (officeOpt.isEmpty()) continue;
@@ -151,10 +111,7 @@ public class PublicDataSyncService {
                             .taskName(item.taskNm())
                             .waitingCount(waiting)
                             .estimatedWaitMinutes(waiting * 5)
-                            .congestionLevel(
-                                    waiting <= 5 ? com.waitzero.domain.queue.entity.CongestionLevel.LOW :
-                                    waiting <= 15 ? com.waitzero.domain.queue.entity.CongestionLevel.MEDIUM :
-                                    com.waitzero.domain.queue.entity.CongestionLevel.HIGH)
+                            .congestionLevel(computeCongestion(waiting))
                             .activeWindows(item.clotCnterNo() != null && !item.clotCnterNo().isBlank() ? 1 : 0)
                             .callNumber(item.clotNo())
                             .callCounterNo(item.clotCnterNo())
@@ -163,43 +120,17 @@ public class PublicDataSyncService {
                     newCount++;
                 }
             }
-
-            log.info("실시간 대기현황 동기화 완료: 총 {}건, 신규 {}건, 갱신 {}건", items.size(), newCount, updateCount);
-            return new SyncResultResponse(items.size(), newCount, updateCount,
-                    "실시간 대기현황 동기화가 완료되었습니다.");
-        } catch (Exception e) {
-            log.error("실시간 대기현황 동기화 실패", e);
-            throw new CustomException("실시간 대기현황 동기화에 실패했습니다: " + e.getMessage(),
-                    HttpStatus.SERVICE_UNAVAILABLE);
         }
+
+        log.info("실시간 대기현황 동기화 완료: 총 {}건, 신규 {}건, 갱신 {}건", total, newCount, updateCount);
+        return new SyncResultResponse(total, newCount, updateCount,
+                "실시간 대기현황 동기화가 완료되었습니다.");
     }
 
-    public String getEncodedApiKey() {
-        return encodedApiKey;
-    }
-
-    public String getBaseUrl() {
-        return baseUrl;
-    }
-
-    public String curlFetch(String url) throws Exception {
-        ProcessBuilder pb = new ProcessBuilder("curl", "-s", "-H", "Accept: application/json", url);
-        pb.redirectErrorStream(true);
-        Process process = pb.start();
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) sb.append(line);
-            boolean finished = process.waitFor(30, TimeUnit.SECONDS);
-            if (!finished) {
-                process.destroyForcibly();
-                throw new RuntimeException("API 호출 타임아웃");
-            }
-            String result = sb.toString();
-            if (result.isBlank()) throw new RuntimeException("빈 응답");
-            return result;
-        }
+    private CongestionLevel computeCongestion(int waiting) {
+        if (waiting < 3) return CongestionLevel.LOW;
+        if (waiting < 10) return CongestionLevel.MEDIUM;
+        return CongestionLevel.HIGH;
     }
 
     private String formatOperatingHours(String begin, String end) {

@@ -10,8 +10,7 @@ class PreRegistration with _$PreRegistration {
     required int userId,
     required int officeId,
     required String officeName,
-    required int categoryId,
-    required String categoryName,
+    String? taskName,
     String? content,
     String? voiceText,
     String? aiSummary,
@@ -30,7 +29,7 @@ class PreRegistrationRequest with _$PreRegistrationRequest {
   const factory PreRegistrationRequest({
     required int userId,
     required int officeId,
-    required int categoryId,
+    String? taskName,
     String? content,
     String? voiceText,
     required String visitDate,

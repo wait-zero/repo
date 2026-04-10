@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import '../../../core/models/category.dart';
 import '../../../core/models/pre_registration.dart';
+import '../../../core/models/queue_status.dart';
 import '../../../core/repositories/pre_registration_repository.dart';
 import '../../auth/providers/auth_providers.dart';
+import '../../office/providers/office_providers.dart';
 import '../providers/registration_providers.dart';
 import '../../../shared/widgets/loading_widget.dart';
 import '../../../shared/widgets/error_widget.dart';
@@ -23,22 +24,28 @@ class PreRegistrationScreen extends ConsumerStatefulWidget {
 class _PreRegistrationScreenState
     extends ConsumerState<PreRegistrationScreen> {
   int _currentStep = 0;
-  Category? _selectedCategory;
+  String? _selectedTaskName;
   DateTime _visitDate = DateTime.now().add(const Duration(days: 1));
   TimeOfDay? _visitTime;
   final _contentController = TextEditingController();
+  final _customTaskController = TextEditingController();
   String? _voiceText;
   bool _isSubmitting = false;
 
   @override
   void dispose() {
     _contentController.dispose();
+    _customTaskController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final categoriesAsync = ref.watch(categoriesProvider);
+    if (widget.officeId == null) {
+      return const Scaffold(body: Center(child: Text('민원실 정보가 없습니다.')));
+    }
+
+    final officeAsync = ref.watch(officeDetailProvider(widget.officeId!));
 
     return Scaffold(
       appBar: AppBar(
@@ -48,16 +55,19 @@ class _PreRegistrationScreenState
           onPressed: () => context.pop(),
         ),
       ),
-      body: categoriesAsync.when(
+      body: officeAsync.when(
         loading: () => const LoadingWidget(),
         error: (error, _) => AppErrorWidget(
-          message: '카테고리를 불러올 수 없습니다.',
-          onRetry: () => ref.invalidate(categoriesProvider),
+          message: '민원실 정보를 불러올 수 없습니다.',
+          onRetry: () =>
+              ref.invalidate(officeDetailProvider(widget.officeId!)),
         ),
-        data: (categories) {
+        data: (office) {
+          final tasks = office.queueStatus?.tasks ?? <TaskStatus>[];
+
           return Stepper(
             currentStep: _currentStep,
-            onStepContinue: () => _onStepContinue(categories),
+            onStepContinue: () => _onStepContinue(tasks),
             onStepCancel: _onStepCancel,
             controlsBuilder: (context, details) {
               return Padding(
@@ -71,12 +81,14 @@ class _PreRegistrationScreenState
                       )
                     else
                       FilledButton(
-                        onPressed: _isSubmitting ? null : details.onStepContinue,
+                        onPressed:
+                            _isSubmitting ? null : details.onStepContinue,
                         child: _isSubmitting
                             ? const SizedBox(
                                 width: 20,
                                 height: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
                               )
                             : const Text('제출'),
                       ),
@@ -91,86 +103,14 @@ class _PreRegistrationScreenState
               );
             },
             steps: [
-              // Step 1: 카테고리 선택
+              // Step 1: 업무 선택
               Step(
-                title: const Text('카테고리 선택'),
+                title: const Text('업무 선택'),
                 isActive: _currentStep >= 0,
                 state: _currentStep > 0
                     ? StepState.complete
                     : StepState.indexed,
-                content: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    RadioGroup<int>(
-                      groupValue: _selectedCategory?.id ?? -1,
-                      onChanged: (value) {
-                        final cat = categories.firstWhere((c) => c.id == value);
-                        setState(() => _selectedCategory = cat);
-                      },
-                      child: Column(
-                        children: categories.map((cat) => ListTile(
-                              leading: Radio<int>(value: cat.id),
-                              title: Text(cat.name),
-                              subtitle: cat.description != null
-                                  ? Text(cat.description!)
-                                  : null,
-                              onTap: () {
-                                setState(() => _selectedCategory = cat);
-                              },
-                            )).toList(),
-                      ),
-                    ),
-                    if (_selectedCategory != null &&
-                        _selectedCategory!.requiredDocuments.isNotEmpty) ...[
-                      const SizedBox(height: 12),
-                      Card(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .primaryContainer
-                            .withValues(alpha: 0.3),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '필요 서류',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelLarge
-                                    ?.copyWith(fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(height: 4),
-                              ..._selectedCategory!.requiredDocuments
-                                  .map((doc) => Padding(
-                                        padding:
-                                            const EdgeInsets.only(top: 2),
-                                        child: Row(
-                                          children: [
-                                            const Icon(Icons.check_circle,
-                                                size: 16),
-                                            const SizedBox(width: 4),
-                                            Text(doc),
-                                          ],
-                                        ),
-                                      )),
-                              if (_selectedCategory!
-                                      .estimatedProcessMinutes !=
-                                  null) ...[
-                                const SizedBox(height: 8),
-                                Text(
-                                  '예상 처리 시간: ${_selectedCategory!.estimatedProcessMinutes}분',
-                                  style:
-                                      Theme.of(context).textTheme.bodySmall,
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
+                content: _buildTaskSelection(tasks),
               ),
 
               // Step 2: 상세 입력
@@ -183,27 +123,24 @@ class _PreRegistrationScreenState
                 content: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 방문 날짜
                     ListTile(
                       leading: const Icon(Icons.calendar_today),
                       title: const Text('방문 예정일'),
-                      subtitle: Text(
-                          DateFormat('yyyy-MM-dd').format(_visitDate)),
+                      subtitle:
+                          Text(DateFormat('yyyy-MM-dd').format(_visitDate)),
                       onTap: () async {
                         final date = await showDatePicker(
                           context: context,
                           initialDate: _visitDate,
                           firstDate: DateTime.now(),
-                          lastDate: DateTime.now()
-                              .add(const Duration(days: 30)),
+                          lastDate:
+                              DateTime.now().add(const Duration(days: 30)),
                         );
                         if (date != null) {
                           setState(() => _visitDate = date);
                         }
                       },
                     ),
-
-                    // 방문 시간
                     ListTile(
                       leading: const Icon(Icons.access_time),
                       title: const Text('방문 예정 시간 (선택)'),
@@ -213,18 +150,15 @@ class _PreRegistrationScreenState
                       onTap: () async {
                         final time = await showTimePicker(
                           context: context,
-                          initialTime:
-                              _visitTime ?? const TimeOfDay(hour: 10, minute: 0),
+                          initialTime: _visitTime ??
+                              const TimeOfDay(hour: 10, minute: 0),
                         );
                         if (time != null) {
                           setState(() => _visitTime = time);
                         }
                       },
                     ),
-
                     const SizedBox(height: 12),
-
-                    // 민원 내용
                     TextField(
                       controller: _contentController,
                       maxLines: 3,
@@ -234,14 +168,12 @@ class _PreRegistrationScreenState
                         alignLabelWithHint: true,
                       ),
                     ),
-
                     const SizedBox(height: 12),
-
-                    // 음성 입력 버튼
                     OutlinedButton.icon(
                       onPressed: () async {
-                        final result = await context.push<Map<String, dynamic>>(
-                            '/voice-input');
+                        final result =
+                            await context.push<Map<String, dynamic>>(
+                                '/voice-input');
                         if (result != null) {
                           setState(() {
                             _voiceText = result['voiceText'] as String?;
@@ -249,14 +181,10 @@ class _PreRegistrationScreenState
                               _contentController.text =
                                   result['content'] as String;
                             }
-                            if (result['categoryName'] != null) {
-                              final catName =
-                                  result['categoryName'] as String;
-                              final match = categories
-                                  .where((c) => c.name == catName);
-                              if (match.isNotEmpty) {
-                                _selectedCategory = match.first;
-                              }
+                            // 음성 분류 결과로 업무명 추정 (참고용)
+                            if (result['taskName'] != null &&
+                                _selectedTaskName == null) {
+                              _selectedTaskName = result['taskName'] as String;
                             }
                           });
                         }
@@ -280,13 +208,13 @@ class _PreRegistrationScreenState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _ConfirmRow(
-                          label: '카테고리',
-                          value: _selectedCategory?.name ?? '-',
+                          label: '업무',
+                          value: _selectedTaskName ?? '-',
                         ),
                         _ConfirmRow(
                           label: '방문 예정일',
-                          value: DateFormat('yyyy-MM-dd')
-                              .format(_visitDate),
+                          value:
+                              DateFormat('yyyy-MM-dd').format(_visitDate),
                         ),
                         _ConfirmRow(
                           label: '방문 시간',
@@ -314,11 +242,58 @@ class _PreRegistrationScreenState
     );
   }
 
-  void _onStepContinue(List<Category> categories) {
+  /// 해당 민원실의 실시간 업무 목록 + 직접 입력 옵션
+  Widget _buildTaskSelection(List<TaskStatus> tasks) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (tasks.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              '실시간 업무 목록을 불러올 수 없습니다. 직접 입력해주세요.',
+              style: TextStyle(color: Colors.grey[600]),
+            ),
+          )
+        else
+          ...tasks
+              .where((t) => t.taskName != null && t.taskName!.isNotEmpty)
+              .map((t) => RadioListTile<String>(
+                    value: t.taskName!,
+                    groupValue: _selectedTaskName,
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedTaskName = value;
+                        _customTaskController.clear();
+                      });
+                    },
+                    title: Text(t.taskName!),
+                    subtitle: Text('대기 ${t.waitingCount}명'),
+                    dense: true,
+                  )),
+        const Divider(),
+        TextField(
+          controller: _customTaskController,
+          decoration: const InputDecoration(
+            labelText: '직접 입력',
+            hintText: '목록에 없는 업무는 직접 입력해주세요',
+            prefixIcon: Icon(Icons.edit),
+          ),
+          onChanged: (value) {
+            setState(() {
+              _selectedTaskName = value.isEmpty ? null : value;
+            });
+          },
+        ),
+      ],
+    );
+  }
+
+  void _onStepContinue(List<TaskStatus> tasks) {
     if (_currentStep == 0) {
-      if (_selectedCategory == null) {
+      if (_selectedTaskName == null || _selectedTaskName!.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('카테고리를 선택해주세요.')),
+          const SnackBar(content: Text('업무를 선택하거나 입력해주세요.')),
         );
         return;
       }
@@ -337,7 +312,7 @@ class _PreRegistrationScreenState
   }
 
   Future<void> _submit() async {
-    if (widget.officeId == null || _selectedCategory == null) return;
+    if (widget.officeId == null || _selectedTaskName == null) return;
 
     setState(() => _isSubmitting = true);
     try {
@@ -348,7 +323,7 @@ class _PreRegistrationScreenState
       final request = PreRegistrationRequest(
         userId: userId,
         officeId: widget.officeId!,
-        categoryId: _selectedCategory!.id,
+        taskName: _selectedTaskName,
         content: _contentController.text.isEmpty
             ? null
             : _contentController.text,

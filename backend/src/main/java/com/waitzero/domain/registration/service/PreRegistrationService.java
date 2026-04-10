@@ -1,7 +1,5 @@
 package com.waitzero.domain.registration.service;
 
-import com.waitzero.domain.category.entity.CivilServiceCategory;
-import com.waitzero.domain.category.repository.CategoryRepository;
 import com.waitzero.domain.office.entity.CivilServiceOffice;
 import com.waitzero.domain.office.repository.OfficeRepository;
 import com.waitzero.domain.registration.dto.PreRegistrationRequest;
@@ -28,7 +26,6 @@ public class PreRegistrationService {
     private final PreRegistrationRepository preRegistrationRepository;
     private final UserRepository userRepository;
     private final OfficeRepository officeRepository;
-    private final CategoryRepository categoryRepository;
 
     @Transactional
     public PreRegistrationResponse create(PreRegistrationRequest request) {
@@ -36,13 +33,11 @@ public class PreRegistrationService {
                 .orElseThrow(() -> new ResourceNotFoundException("사용자", request.userId()));
         CivilServiceOffice office = officeRepository.findById(request.officeId())
                 .orElseThrow(() -> new ResourceNotFoundException("민원실", request.officeId()));
-        CivilServiceCategory category = categoryRepository.findById(request.categoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("카테고리", request.categoryId()));
 
         PreRegistration registration = PreRegistration.builder()
                 .user(user)
                 .office(office)
-                .category(category)
+                .taskName(request.taskName())
                 .content(request.content())
                 .voiceText(request.voiceText())
                 .visitDate(request.visitDate())

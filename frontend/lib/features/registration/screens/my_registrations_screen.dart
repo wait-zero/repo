@@ -117,7 +117,7 @@ class MyRegistrationsScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 20),
                   _DetailRow(label: '민원실', value: reg.officeName),
-                  _DetailRow(label: '카테고리', value: reg.categoryName),
+                  _DetailRow(label: '업무', value: reg.taskName ?? '업무 미지정'),
                   _DetailRow(label: '방문 예정일', value: reg.visitDate),
                   if (reg.visitTime != null)
                     _DetailRow(label: '방문 시간', value: reg.visitTime!),

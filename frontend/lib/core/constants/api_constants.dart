@@ -7,10 +7,6 @@ class ApiConstants {
   static String officeStatus(int id) => '/api/offices/$id/status';
   static const String nearbyOffices = '/api/offices/nearby';
 
-  // Categories
-  static const String categories = '/api/categories';
-  static String categoryDetail(int id) => '/api/categories/$id';
-
   // Queue Status
   static String queueStatus(int officeId) => '/api/queue-status/$officeId';
 

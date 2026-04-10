@@ -62,11 +62,11 @@ class RegistrationCard extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(Icons.category_outlined,
+                  Icon(Icons.assignment_outlined,
                       size: 16, color: Colors.grey[600]),
                   const SizedBox(width: 4),
                   Text(
-                    registration.categoryName,
+                    registration.taskName ?? '업무 미지정',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],

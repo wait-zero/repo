@@ -29,7 +29,9 @@
       "Bash(winget search:*)",
       "Bash(unzip -q -o /c/Users/sth90/flutter.zip -d /c/Users/sth90/)",
       "Bash(export PATH=\"/c/Users/sth90/flutter/bin:$PATH\")",
-      "Bash(cmd.exe /c \"netstat -an | findstr 3000\")"
+      "Bash(cmd.exe /c \"netstat -an | findstr 3000\")",
+      "Bash(gh run:*)",
+      "Bash(./gradlew compileJava --no-daemon -q)"
     ]
   },
   "disabledMcpjsonServers": [

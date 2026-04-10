@@ -34,7 +34,6 @@ public class SecurityConfig {
                                 "/api/auth/signup",
                                 "/api/auth/login",
                                 "/api/offices/**",
-                                "/api/categories/**",
                                 "/api/queue-status/**",
                                 "/api/queue-history/**",
                                 "/api/admin/**",

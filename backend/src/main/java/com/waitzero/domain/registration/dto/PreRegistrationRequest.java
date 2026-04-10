@@ -12,8 +12,8 @@ public record PreRegistrationRequest(
         @NotNull(message = "민원실 ID는 필수입니다.")
         Long officeId,
 
-        @NotNull(message = "카테고리 ID는 필수입니다.")
-        Long categoryId,
+        /** 선택할 업무명 (공공데이터 API의 taskNm 또는 직접 입력) */
+        String taskName,
 
         String content,
 

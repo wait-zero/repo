@@ -1,6 +1,5 @@
 package com.waitzero.domain.registration.entity;
 
-import com.waitzero.domain.category.entity.CivilServiceCategory;
 import com.waitzero.domain.office.entity.CivilServiceOffice;
 import com.waitzero.domain.user.entity.User;
 import com.waitzero.global.entity.BaseTimeEntity;
@@ -31,9 +30,13 @@ public class PreRegistration extends BaseTimeEntity {
     @JoinColumn(name = "office_id", nullable = false)
     private CivilServiceOffice office;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", nullable = false)
-    private CivilServiceCategory category;
+    /**
+     * 사용자가 선택한 업무명 (자유 문자열).
+     * 공공데이터 API의 실시간 업무 목록에서 선택하거나 직접 입력.
+     * 민원실마다 업무 목록이 달라 카테고리로 분류 불가 → 문자열로 저장.
+     */
+    @Column(name = "task_name", length = 200)
+    private String taskName;
 
     @Column(columnDefinition = "TEXT")
     private String content;
@@ -54,12 +57,12 @@ public class PreRegistration extends BaseTimeEntity {
     private LocalTime visitTime;
 
     @Builder
-    public PreRegistration(User user, CivilServiceOffice office, CivilServiceCategory category,
+    public PreRegistration(User user, CivilServiceOffice office, String taskName,
                            String content, String voiceText, String aiSummary,
                            LocalDate visitDate, LocalTime visitTime) {
         this.user = user;
         this.office = office;
-        this.category = category;
+        this.taskName = taskName;
         this.content = content;
         this.voiceText = voiceText;
         this.aiSummary = aiSummary;
