@@ -3,6 +3,7 @@ package com.waitzero.infra.publicdata.client;
 import com.waitzero.infra.publicdata.dto.CsoInfoItem;
 import com.waitzero.infra.publicdata.dto.CsoRealtimeItem;
 import com.waitzero.infra.publicdata.dto.PublicDataApiResponse;
+import com.waitzero.infra.publicdata.monitor.PublicDataCallTracker;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -33,11 +34,14 @@ public class PublicDataClient {
     private static final int DEFAULT_PAGE_SIZE = 500;
 
     private final RestClient restClient;
+    private final PublicDataCallTracker callTracker;
     private final String apiKey;
 
     public PublicDataClient(RestClient publicDataRestClient,
+                            PublicDataCallTracker callTracker,
                             @Value("${publicdata.api-key}") String apiKey) {
         this.restClient = publicDataRestClient;
+        this.callTracker = callTracker;
         this.apiKey = apiKey;
     }
 
@@ -68,6 +72,7 @@ public class PublicDataClient {
         while (true) {
             final int currentPage = pageNo;
             try {
+                callTracker.record(path);
                 PublicDataApiResponse<T> response = restClient.get()
                         .uri(uriBuilder -> uriBuilder
                                 .path(path)

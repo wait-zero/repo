@@ -1,6 +1,7 @@
 package com.waitzero.infra.publicdata.controller;
 
 import com.github.benmanes.caffeine.cache.stats.CacheStats;
+import com.waitzero.infra.publicdata.monitor.PublicDataCallTracker;
 import com.waitzero.infra.publicdata.service.RealtimeStatusService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.CacheManager;
@@ -28,6 +29,7 @@ public class CacheStatsController {
 
     private final CacheManager cacheManager;
     private final RealtimeStatusService realtimeStatusService;
+    private final PublicDataCallTracker callTracker;
 
     @GetMapping("/stats")
     public Map<String, Object> stats() {
@@ -49,6 +51,19 @@ public class CacheStatsController {
                 result.put(cacheName, detail);
             }
         }
+        return result;
+    }
+
+    @GetMapping("/api-usage")
+    public Map<String, Object> apiUsage() {
+        var stats = callTracker.todayStats();
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("date", stats.date().toString());
+        result.put("totalCalls", stats.totalCalls());
+        result.put("dailyLimit", stats.dailyLimit());
+        result.put("remaining", stats.remaining());
+        result.put("usageRate", String.format("%.1f%%", stats.usageRate() * 100));
+        result.put("byEndpoint", stats.byEndpoint());
         return result;
     }
 
